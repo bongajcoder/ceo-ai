@@ -2,6 +2,7 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { errorHandler } from './middleware/error.middleware';
 import { logger } from './utils/logger';
+import { chatController } from './controllers/chat.controller';
 
 export function createServer(): Express {
   const app = express();
@@ -48,9 +49,14 @@ export function createServer(): Express {
     });
   });
 
-  // API routes will be added here
+  // Chat/AI routes
+  app.post('/api/chat', chatController.chat.bind(chatController));
+  app.post('/api/decision', chatController.decisionSupport.bind(chatController));
+  app.post('/api/briefing', chatController.dailyBriefing.bind(chatController));
+  app.get('/api/cache/stats', chatController.cacheStats.bind(chatController));
+  app.post('/api/cache/clear', chatController.clearCache.bind(chatController));
+
   // TODO: Add /api/auth routes
-  // TODO: Add /api/chat routes
   // TODO: Add /api/financial routes
 
   // 404 handler
