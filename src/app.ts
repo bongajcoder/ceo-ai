@@ -3,6 +3,8 @@ import cors from 'cors';
 import { errorHandler } from './middleware/error.middleware';
 import { logger } from './utils/logger';
 import { chatController } from './controllers/chat.controller';
+import { authController } from './controllers/auth.controller';
+import { requireAuth } from './middleware/auth.middleware';
 
 export function createServer(): Express {
   const app = express();
@@ -49,14 +51,18 @@ export function createServer(): Express {
     });
   });
 
-  // Chat/AI routes
-  app.post('/api/chat', chatController.chat.bind(chatController));
-  app.post('/api/decision', chatController.decisionSupport.bind(chatController));
-  app.post('/api/briefing', chatController.dailyBriefing.bind(chatController));
-  app.get('/api/cache/stats', chatController.cacheStats.bind(chatController));
-  app.post('/api/cache/clear', chatController.clearCache.bind(chatController));
+  // Auth routes (public)
+  app.post('/api/auth/login', authController.login.bind(authController));
+  app.get('/api/auth/info', authController.info.bind(authController));
+  app.get('/api/auth/status', requireAuth, authController.status.bind(authController));
 
-  // TODO: Add /api/auth routes
+  // Chat/AI routes (protected)
+  app.post('/api/chat', requireAuth, chatController.chat.bind(chatController));
+  app.post('/api/decision', requireAuth, chatController.decisionSupport.bind(chatController));
+  app.post('/api/briefing', requireAuth, chatController.dailyBriefing.bind(chatController));
+  app.get('/api/cache/stats', requireAuth, chatController.cacheStats.bind(chatController));
+  app.post('/api/cache/clear', requireAuth, chatController.clearCache.bind(chatController));
+
   // TODO: Add /api/financial routes
 
   // 404 handler
