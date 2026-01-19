@@ -4,6 +4,7 @@ import { errorHandler } from './middleware/error.middleware';
 import { logger } from './utils/logger';
 import { chatController } from './controllers/chat.controller';
 import { authController } from './controllers/auth.controller';
+import { financialController } from './controllers/financial.controller';
 import { requireAuth } from './middleware/auth.middleware';
 
 export function createServer(): Express {
@@ -63,7 +64,15 @@ export function createServer(): Express {
   app.get('/api/cache/stats', requireAuth, chatController.cacheStats.bind(chatController));
   app.post('/api/cache/clear', requireAuth, chatController.clearCache.bind(chatController));
 
-  // TODO: Add /api/financial routes
+  // Financial routes (protected)
+  app.get('/api/financial/info', financialController.info.bind(financialController));
+  app.post('/api/financial/transactions', requireAuth, financialController.addTransaction.bind(financialController));
+  app.get('/api/financial/transactions', requireAuth, financialController.getTransactions.bind(financialController));
+  app.get('/api/financial/transactions/:id', requireAuth, financialController.getTransaction.bind(financialController));
+  app.get('/api/financial/summary', requireAuth, financialController.getSummary.bind(financialController));
+  app.get('/api/financial/breakdown', requireAuth, financialController.getPillarBreakdown.bind(financialController));
+  app.get('/api/financial/recent', requireAuth, financialController.getRecent.bind(financialController));
+  app.post('/api/financial/clear', requireAuth, financialController.clearAll.bind(financialController));
 
   // 404 handler
   app.use((req: Request, res: Response) => {
